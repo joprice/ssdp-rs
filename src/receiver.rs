@@ -143,9 +143,11 @@ fn receive_packets<T>(recv: PacketReceiver, send: Sender<(T, SocketAddr)>)
 
         trace!("Received packet with {} bytes", msg_bytes.len());
 
-        // Unwrap Will Cause A Panic If Receiver Hung Up Which Is Desired
         match T::raw_ssdp(&msg_bytes[..]) {
-            Ok(n) => send.send((n, addr)).unwrap(),
+            Ok(n) => {
+                // ignoring error to allow iterator to exit early
+                let _ = send.send((n, addr));
+            },
             Err(_) => {
                 continue;
             }
